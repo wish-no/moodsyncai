@@ -16,8 +16,6 @@ MoodSyncAI is a multi-modal sentiment and emotion analysis system that processes
 
 ## System Architecture
 
-Yes, copy everything below and paste it all into your README.md file in one go.
-
 markdown# MoodSyncAI — Multi-Modal Sentiment and Emotion Analyser
 
 **Module:** Data Analytics-3 — Deep Learning and Generative AI  
