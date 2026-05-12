@@ -1,11 +1,13 @@
-from .facial_emotion import analyse_facial_emotion
-from .text_sentiment import analyse_text_sentiment
-from .fusion import fuse
-from .generator import generate_summary
+from .facial_emotion       import analyse_facial_emotion
+from .text_sentiment       import analyse_text_sentiment
+from .audio_transcription  import transcribe_audio
+from .fusion               import fuse
+from .generator            import generate_summary
 
 __all__ = [
     "analyse_facial_emotion",
     "analyse_text_sentiment",
+    "transcribe_audio",
     "fuse",
     "generate_summary",
 ]
