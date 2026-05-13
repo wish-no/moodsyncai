@@ -13,5 +13,5 @@ accelerate>=0.27.0
 openai-whisper
 soundfile
 scipy
-opencv-python
-huggingface_hub==0.23.0
+opencv-python-headless
+huggingface_hub
