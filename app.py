@@ -2,6 +2,7 @@
 app.py
 MoodSyncAI — Multi-Modal Sentiment & Emotion Analyser
 3 modalities: Face image + Text + Audio (Whisper)
++ Attention visualisation: Grad-CAM + Token attention weights
 Run:  python app.py
 """
 
@@ -16,6 +17,7 @@ from models.text_sentiment      import analyse_text_sentiment
 from models.audio_transcription import transcribe_audio
 from models.fusion              import fuse
 from models.generator           import generate_summary
+from models.attention_viz       import get_token_attention, get_gradcam_overlay
 
 C_BG      = "#0D1117"
 C_SURFACE = "#161B22"
@@ -105,8 +107,8 @@ def run_analysis(image, text, audio, fusion_strategy):
     )
 
     # Step 2 — Whisper audio transcription
-    audio_text_result  = None
-    audio_display      = ""
+    audio_text_result = None
+    audio_display     = ""
     if audio is not None:
         transcription = transcribe_audio(audio)
         transcript    = transcription.get("transcript", "")
@@ -132,7 +134,7 @@ def run_analysis(image, text, audio, fusion_strategy):
               "dominant_emotion": "neutral", "emotion_scores": {}, "error": "No text"}
     )
 
-    # Step 4 — Fusion (2 or 3 modal)
+    # Step 4 — Fusion
     strategy_key = {
         "Attention Fusion (default)": "attention",
         "Late Fusion":                "late",
@@ -148,6 +150,10 @@ def run_analysis(image, text, audio, fusion_strategy):
 
     # Step 5 — Generative summary
     summary = generate_summary(facial_result, text_result, fusion_result)
+
+    # Step 6 — Attention visualisation
+    gradcam_fig  = get_gradcam_overlay(image, facial_result.get("all_scores", {}))
+    token_fig    = get_token_attention(effective_text) if effective_text else None
 
     # Build charts
     face_chart_fig = bar_chart(
@@ -173,7 +179,8 @@ def run_analysis(image, text, audio, fusion_strategy):
     status += f"\nModalities used: {n_modal}"
 
     return (face_chart_fig, text_chart_fig, fus_chart_fig,
-            status, audio_display, summary)
+            status, audio_display, summary,
+            gradcam_fig, token_fig)
 
 
 CSS = """
@@ -209,7 +216,8 @@ FOOTER = """
 <div style="text-align:center;padding:10px 0 4px;color:#30363D;font-size:11px">
   DA3 Deep Learning &amp; GenAI &nbsp;·&nbsp;
   DeepFace CNN &nbsp;·&nbsp; DistilBERT &nbsp;·&nbsp;
-  Whisper ASR &nbsp;·&nbsp; Late / Early / Attention Fusion &nbsp;·&nbsp; Flan-T5
+  Whisper ASR &nbsp;·&nbsp; Late / Early / Attention Fusion &nbsp;·&nbsp; Flan-T5 &nbsp;·&nbsp;
+  Grad-CAM + Token Attention
 </div>
 """
 
@@ -251,11 +259,17 @@ def build_app():
                 gr.Markdown("### Generative Summary (Flan-T5)")
                 summary_out = gr.Textbox(label="AI-generated context", lines=4, interactive=False)
 
+                gr.Markdown("### Attention Visualisation")
+                with gr.Row():
+                    gradcam_plot = gr.Plot(label="Grad-CAM — CNN face regions")
+                    token_plot   = gr.Plot(label="Token attention — BERT words")
+
         btn.click(
             fn=run_analysis,
             inputs=[img_in, txt_in, audio_in, fusion_selector],
             outputs=[face_plot, text_plot, fusion_plot,
-                     status_out, audio_out, summary_out],
+                     status_out, audio_out, summary_out,
+                     gradcam_plot, token_plot],
         )
 
         gr.HTML(FOOTER)

@@ -3,6 +3,7 @@ from .text_sentiment       import analyse_text_sentiment
 from .audio_transcription  import transcribe_audio
 from .fusion               import fuse
 from .generator            import generate_summary
+from .attention_viz        import get_token_attention, get_gradcam_overlay
 
 __all__ = [
     "analyse_facial_emotion",
@@ -10,4 +11,6 @@ __all__ = [
     "transcribe_audio",
     "fuse",
     "generate_summary",
+    "get_token_attention",
+    "get_gradcam_overlay",
 ]
