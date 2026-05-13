@@ -89,6 +89,23 @@ Attention Fusion achieves 91.2% accuracy, a 12.8 percentage point improvement ov
 ---
 
 ## Project Structure
+moodsyncai/
+├── app.py                       Main Gradio application and pipeline entry point
+├── requirements.txt             Python dependencies
+├── .gitignore
+├── README.md
+├── setup_git.sh
+├── models/
+│   ├── init.py
+│   ├── facial_emotion.py        CNN module using DeepFace and VGG-Face
+│   ├── text_sentiment.py        Transformer NLP using DistilBERT SST-2 and GoEmotions
+│   ├── fusion.py                All three fusion strategies and mismatch detection
+│   ├── generator.py             Generative summary using Flan-T5
+│   ├── audio_transcription.py   Whisper ASR — audio to text transcription
+│   ├── attention_viz.py         Grad-CAM and BERT token attention visualisation
+│   └── webcam_timeline.py       Real-time webcam emotion timeline
+└── tests/
+└── test_pipeline.py         Smoke tests for all pipeline components
 
 ---
 
