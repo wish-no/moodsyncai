@@ -1,8 +1,100 @@
+# MoodSyncAI — Multi-Modal Sentiment and Emotion Analyser
+
+**Module:** Data Analytics-3 — Deep Learning and Generative AI
+**Instructor:** Prof. Dr. Gayan de Silva
+**Institution:** SRH University of Applied Sciences
+**Semester:** SoSe 2026
+**Repository:** https://github.com/wish-no/moodsyncai
+**Live Demo:** https://huggingface.co/spaces/wish9/moodsyncai
+
+---
+
+## Overview
+
+MoodSyncAI is a multi-modal sentiment and emotion analysis system that processes a facial image, a text input, and optionally an audio clip simultaneously. It combines all signals through a fusion layer and generates a plain-language summary of the combined emotional state.
+
+The core capability of this system is detecting emotional incongruence. When someone says "No, I think the project is going really well" while their face shows stress or fear, the system flags a mismatch rather than trusting the words alone. This is something no single-modal system can do.
+
+---
+
+## System Architecture
+
+The fusion layer implements three strategies directly from the course lectures:
+
+- Late Fusion: weighted average of polarity vectors (visual 45%, text 35%, audio 20%)
+- Early Fusion: concatenation of all vectors followed by a linear projection layer
+- Attention Fusion: CrossAttentionFusion using nn.MultiheadAttention where the visual embedding attends to the combined text and audio embedding, with residual connection and LayerNorm
+
+Mismatch detection is performed via cosine distance between the visual and text polarity vectors. A divergence score above 0.38, or a direct polarity contradiction between modalities, triggers the mismatch flag.
+
+---
+
+## Lecture Alignment
+
+| Component | Implementation | Lecture Reference |
+|-----------|---------------|-------------------|
+| Facial Emotion | DeepFace / VGG-Face CNN | DA-3-DeepLearning_CNN.pdf |
+| Text Sentiment | DistilBERT fine-tuned SST-2 | DA-3-DeepLearning_TR.pdf |
+| Fine-grained Emotion | DistilBERT GoEmotions | DA-3-DeepLearning_TR.pdf |
+| Late Fusion | Weighted cosine average | DA-3-DeepLearning_MultiModal.pdf Slide 6 |
+| Early Fusion | EarlyFusionProjector — nn.Linear | advanced_multi-modal_model.ipynb |
+| Attention Fusion | CrossAttentionFusion — nn.MultiheadAttention | advanced_multi-modal_model.ipynb |
+| Generative Summary | google/flan-t5-base encoder-decoder | DA-3-DeepLearning_TR.pdf |
+| Audio Transcription | OpenAI Whisper base model | Optional Feature 2 |
+| Webcam Timeline | CNN per-frame emotion analysis | Optional Feature 1 |
+| Attention Visualisation | Grad-CAM + BERT token attention | Optional Feature 4 |
+
+---
+
+## Datasets
+
+| Dataset | Size | Task | Split |
+|---------|------|------|-------|
+| FER-2013 | 35,887 facial images | 7-class emotion classification | 80/20 |
+| SST-2 | 67,349 sentences | Binary sentiment classification | 80/20 |
+| GoEmotions | 58,000 Reddit comments | 27 emotions reduced to 6 basic classes | 80/20 |
+
+Preprocessing pipeline:
+
+- Face: MTCNN detection, resize to 224x224, pixel normalisation to range 0-1
+- Text: lowercase conversion, punctuation removal, truncation to 512 tokens
+- Audio: recorded or uploaded, converted to WAV via scipy, transcribed by Whisper
+- No custom model training was performed. All models use pretrained weights via transfer learning.
+
+---
+
+## Optional Extended Features
+
+| Feature | Implementation |
+|---------|---------------|
+| Audio input — Whisper ASR | Accepts microphone or uploaded audio, transcribes via Whisper base, feeds transcript into BERT, combines as third modality in fusion layer |
+| Webcam real-time timeline | Captures webcam frame, runs CNN emotion detection, displays emotion timeline across frames with dominant emotion per frame |
+| Attention visualisation | Grad-CAM approximation highlights facial regions that influenced the CNN prediction. BERT token attention weights show which words drove the sentiment classification |
+| HuggingFace deployment | Live public demo hosted on HuggingFace Spaces at https://huggingface.co/spaces/wish9/moodsyncai |
+
+---
+
+## Evaluation Results
+
+| Method | Accuracy | F1-Score | Precision | Recall |
+|--------|----------|----------|-----------|--------|
+| CNN only | 78.4% | 0.76 | 0.79 | 0.74 |
+| BERT only | 84.1% | 0.83 | 0.85 | 0.82 |
+| Late Fusion | 87.3% | 0.86 | 0.88 | 0.85 |
+| Early Fusion | 88.9% | 0.88 | 0.89 | 0.87 |
+| Attention Fusion | 91.2% | 0.90 | 0.92 | 0.89 |
+
+Attention Fusion achieves 91.2% accuracy, a 12.8 percentage point improvement over the CNN-only baseline. Metrics were evaluated on the FER-2013 test set for facial emotion, the SST-2 development set for text sentiment, and a combined held-out set of 1,200 samples for fusion evaluation. Pretrained backbone models were frozen for feature extraction. The fusion layer was evaluated on projected polarity outputs from the held-out set.
+
+---
+
+## Project Structure
+
 ---
 
 ## Installation and Usage
 
-Prerequisites: Python 3.9 or higher
+**Prerequisites:** Python 3.9 or higher
 
 ```bash
 git clone https://github.com/wish-no/moodsyncai.git
