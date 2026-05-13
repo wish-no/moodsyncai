@@ -4,6 +4,7 @@ from .audio_transcription  import transcribe_audio
 from .fusion               import fuse
 from .generator            import generate_summary
 from .attention_viz        import get_token_attention, get_gradcam_overlay
+from .webcam_timeline      import analyse_webcam_frames, analyse_frame
 
 __all__ = [
     "analyse_facial_emotion",
@@ -13,4 +14,6 @@ __all__ = [
     "generate_summary",
     "get_token_attention",
     "get_gradcam_overlay",
+    "analyse_webcam_frames",
+    "analyse_frame",
 ]
